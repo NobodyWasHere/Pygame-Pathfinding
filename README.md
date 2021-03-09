@@ -6,7 +6,7 @@ check if pygame is installed (if not, look at https://www.pygame.org/wiki/Gettin
 Open pathfindpg.py with python
 
 Controls:
-left click : Set new position for start/end
+left click : Set new position for start/end \n
 middle click : toggle between start and end
 right click : draw/erase wall
 left shift : remove all
