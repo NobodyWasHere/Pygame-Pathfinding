@@ -1,8 +1,8 @@
 # Pygame-Pathfinding
-A pathfinding algorithm I made with a bad BFS with Pygame.
+A pathfinding algorithm I made with Pygame.
 
 # Use
-check if pygame is installed (if not, look at https://www.pygame.org/wiki/GettingStarted)  
+pygame must be installed (if not, look at https://www.pygame.org/wiki/GettingStarted)  
 Open pathfindpg.py with python
 
 # Controls
