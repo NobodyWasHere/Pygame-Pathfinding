@@ -12,12 +12,13 @@ BLUE = (0, 0, 255)
 #PURPLE = (255,0,255)
 ORANGE = (255,165,0)
 WIDTH = 30
+LineWidth = 5
 MARGIN = 1
 CELLS_X = 25
 CELLS_Y = 35
 
-Start = [0,0]
-End = [0,0]
+Start = (0,0)
+End = (0,0)
 ToggleStartEnd = True
 UserDraw = False
 ClickVal = 0
@@ -25,6 +26,8 @@ ClickVal = 0
 FRAMES = 60
 ShowFPS = False
 PathFind = []
+OpenNodes = []
+ClosedNodes = []
 # board default varible
 Board_VAL = 0
 
@@ -53,11 +56,11 @@ def Text(row, column):
     num_text = font.render(info, 1, pygame.Color("coral"))
     return num_text
 
-def RemovePath(board):
+'''def RemovePath(board):
     for i in range(len(board)):
         board[i] = [0 if x>0 else x for x in board[i]]
     return board
-
+'''
 def MouseToMatrix():
     pos = pygame.mouse.get_pos()
     #print(pos)
@@ -66,19 +69,19 @@ def MouseToMatrix():
     return column,row
 
 def eventDetect():
-    global done,Start,End,ToggleStartEnd,UserDraw,board,ClickVal,PathFind
+    global done,Start,End,ToggleStartEnd,UserDraw,board,ClickVal,PathFind,ClosedNodes, OpenNodes
 
     if event.type == pygame.QUIT:
         done = True
 
     if event.type == pygame.MOUSEBUTTONDOWN:
         if event.button == 1:
-            column,row = MouseToMatrix()
+            row,column = MouseToMatrix()
             #print(column,row)
             if ToggleStartEnd:
-                Start = [column,row]
+                Start = (column,row)
             else:
-                End = [column,row]
+                End = (column,row)
 
         elif event.button == 2:
             ToggleStartEnd = not ToggleStartEnd
@@ -118,40 +121,42 @@ def eventDetect():
             board = [[Board_VAL for x in range(CELLS_Y)] for y in range(CELLS_X)]
             #board = RemovePath(board)
             PathFind = []
+            OpenNodes = []
+            ClosedNodes = []
 
         elif event.key == pygame.K_LCTRL:
             #board = [[Board_VAL for x in range(CELLS_Y)] for y in range(CELLS_X)]
-            board = RemovePath(board)
+            #board = RemovePath(board)
             PathFind = []
+            OpenNodes = []
+            ClosedNodes = []
 
         elif event.key == pygame.K_SPACE:
-            board = RemovePath(board)
-            Start2 = list(reversed(Start))
-            End2 = list(reversed(End))
+            #board = RemovePath(board)
             t0 = time()
-            board,PathFind = bfs(Start2,End2,board)
-            PathFind = ConvertPath()
+            ClosedNodes, OpenNodes, PathFind = bfs(board,Start,End)
             t1 = time()
+            PathFind = ConvertPath(PathFind)
             t2 = t1 - t0
             print('Time Taken:',t2)
 
-def ConvertPath():
+def ConvertPath(PathFind):
     NewPath = []
     for Step in PathFind:
-        Step1 = Step[::-1]
+        Step1 = list(Step[::-1])
         for i in range(2):
             Step1[i] = (MARGIN + WIDTH) * Step1[i] + MARGIN + WIDTH // 2
-        NewPath.append(Step1)
+        NewPath.append(tuple(Step1))
     return NewPath
 
 def DrawStartEnd():
     pygame.draw.circle(screen, GREEN,
-    [(MARGIN + WIDTH) * Start[0] + MARGIN + WIDTH // 2,
-    (MARGIN + WIDTH) * Start[1] + MARGIN + WIDTH // 2], WIDTH // 2)
+    [(MARGIN + WIDTH) * Start[1] + MARGIN + WIDTH // 2,
+    (MARGIN + WIDTH) * Start[0] + MARGIN + WIDTH // 2], WIDTH // 2)
 
     pygame.draw.circle(screen, RED,
-    [(MARGIN + WIDTH) * End[0] + MARGIN + WIDTH // 2,
-    (MARGIN + WIDTH) * End[1] + MARGIN + WIDTH // 2], WIDTH // 2)
+    [(MARGIN + WIDTH) * End[1] + MARGIN + WIDTH // 2,
+    (MARGIN + WIDTH) * End[0] + MARGIN + WIDTH // 2], WIDTH // 2)
 
 def DrawPath():
     '''
@@ -161,35 +166,50 @@ def DrawPath():
         [(MARGIN + WIDTH) * Step[1] + MARGIN + WIDTH // 2,
         (MARGIN + WIDTH) * Step[0] + MARGIN + WIDTH // 2], WIDTH // 2)'''
     if len(PathFind) > 1:
-        pygame.draw.lines(screen, ORANGE, False, PathFind, 5)
+        pygame.draw.lines(screen, ORANGE, False, PathFind, LineWidth)
 
-def Render():
+'''def DrawNodes():
+    for node in ClosedNodes:
+        pygame.draw.rect(screen, BLUE,
+            [(MARGIN + WIDTH) * node[1] + MARGIN,
+            (MARGIN + WIDTH) * node[0] + MARGIN, WIDTH, WIDTH])
+    for node in OpenNodes:
+        pygame.draw.rect(screen, GREEN,
+            [(MARGIN + WIDTH) * node[1] + MARGIN,
+            (MARGIN + WIDTH) * node[0] + MARGIN, WIDTH, WIDTH])'''
+
+def DrawGrid():
     for row in range(CELLS_X):
         for column in range(CELLS_Y):
             color = WHITE
-            if board[row][column] == 0:
-                color = WHITE
-            elif board[row][column] < 0:
+            if board[row][column] != 0:# board[row][column] < 0:
                 color = BLACK
-            elif board[row][column] == 1:
+            elif (row,column) in OpenNodes:
                 color = GREEN
-            elif board[row][column] > 0:
+            elif (row,column) in ClosedNodes:
                 color = BLUE
+            '''elif board[row][column] == 0:
+                color = WHITE'''
 
             pygame.draw.rect(screen, color,
-            [(MARGIN + WIDTH) * column + MARGIN,
-            (MARGIN + WIDTH) * row + MARGIN, WIDTH, WIDTH])
+                [(MARGIN + WIDTH) * column + MARGIN,
+                (MARGIN + WIDTH) * row + MARGIN, WIDTH, WIDTH])
 
-            screen.blit(Text(row,column), ((MARGIN + WIDTH) * column + MARGIN, (MARGIN + WIDTH) * row + MARGIN))
+            #screen.blit(Text(row,column), ((MARGIN + WIDTH) * column + MARGIN, (MARGIN + WIDTH) * row + MARGIN))
 
+def Render():
+    screen.fill(BLACK)
+
+    DrawGrid()
+    #DrawNodes()
     DrawStartEnd()
     DrawPath()
     #pygame.draw.lines(screen, (255,0,255), False, [(20,20), (70,80),(255,0)], 2)
 #--------------------------------------------------------#
+
 while not done:
     for event in pygame.event.get():
         eventDetect()
-    screen.fill(BLACK)
 
     # Draw the board
     Render()
