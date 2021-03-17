@@ -1,5 +1,5 @@
 
-def get_neighbors(board,coords,boardendcoords,visited):
+def get_neighbors(board,coords,boardendcoords):
     #printboard(board)
     adjacentNodes = []
     for i in range(-1,2):
@@ -45,7 +45,7 @@ def bfs(board,start,end):
             #print('nice',origins,start,end)
             return [x for x in visited if x not in queue],queue,pathfind(origins,start,end)
 
-        neighbors = get_neighbors(board,node,boardendcoords,queue)
+        neighbors = get_neighbors(board,node,boardendcoords)
         for neighbor in neighbors:
             if neighbor not in visited:
                 origins[neighbor] = node
