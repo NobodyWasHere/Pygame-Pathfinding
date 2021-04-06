@@ -2,6 +2,7 @@
 A pathfinding algorithm I made with Pygame.
 
 # Use
+Use python 3.7
 pygame must be installed (if not, look at https://www.pygame.org/wiki/GettingStarted)  
 Open pathfindpg.py with python
 
